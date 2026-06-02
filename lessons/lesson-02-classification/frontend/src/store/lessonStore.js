@@ -17,7 +17,7 @@ export const useLessonStore = create(
         })),
     }),
     {
-      name: 'lesson-01-store',
+      name: 'lesson-02-store',
       // Only the editor buffers survive reloads; the active tab resets to
       // Tutorial on reload (per design.md state-ownership table).
       partialize: (state) => ({ exerciseCode: state.exerciseCode }),

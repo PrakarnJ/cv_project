@@ -8,7 +8,7 @@ import {
   updateProgress,
 } from '../api'
 
-const LESSON_KEY = 'lesson-01'
+const LESSON_KEY = 'lesson-02'
 
 // Hardcoded expected test totals for the two coding exercises. Once
 // hints/test_count metadata lands in lesson.config.json this can be derived.
@@ -186,7 +186,7 @@ export default function Progress() {
     <section className="space-y-6">
       <header>
         <h2 className="text-xl font-medium text-slate-900">
-          {lesson ? `Lesson 01 — ${lesson.title}` : 'Progress'}
+          {lesson ? `Lesson 02 — ${lesson.title}` : 'Progress'}
         </h2>
         {lessonProgress.completed_at && (
           <p className="mt-1 text-sm text-green-700">

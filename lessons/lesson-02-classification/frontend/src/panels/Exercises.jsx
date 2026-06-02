@@ -119,7 +119,7 @@ function CodeExercise({ exercise }) {
           setSummary(done)
           persistProgress.mutate({
             lessons: {
-              'lesson-01': {
+              'lesson-02': {
                 exercises: {
                   [exercise.id]: {
                     tests_passed: done.passed,

@@ -3,7 +3,7 @@ import { getLesson } from '../api'
 import ProgressDots from './ProgressDots'
 
 const TOTAL_LESSONS = 12
-const CURRENT_LESSON = 1
+const CURRENT_LESSON = 2
 
 export default function TopBar() {
   const { data: lesson } = useQuery({
@@ -17,7 +17,7 @@ export default function TopBar() {
       <div className="flex items-baseline gap-4">
         <span className="text-sm font-medium text-slate-500">cv-learning</span>
         <h1 className="text-lg font-medium text-slate-900">
-          Lesson 01: <span data-testid="lesson-title">{title}</span>
+          Lesson 02: <span data-testid="lesson-title">{title}</span>
         </h1>
         {subtitle && (
           <span className="text-sm text-slate-500">{subtitle}</span>
