@@ -65,10 +65,21 @@ sed_inplace() {
   fi
 }
 
-sed_inplace -E "s/\"id\": \"lesson-01\"/\"id\": \"$SHORT_ID\"/" \
-  "$TARGET/lesson.config.json"
-sed_inplace -E "s/\"title\": \".*\"/\"title\": \"TODO: $SLUG title\"/" \
-  "$TARGET/lesson.config.json"
+# Update the lesson.config.json top-level `id` and `title` fields.
+# Done in python3 (available by default on macOS and Ubuntu 24.04) so the
+# edit is structural — the previous sed-based version's "title" regex was
+# unanchored and clobbered every exercise title too.
+python3 <<PYEOF
+import json
+path = "$TARGET/lesson.config.json"
+with open(path) as f:
+    data = json.load(f)
+data["id"] = "$SHORT_ID"
+data["title"] = "TODO: $SLUG title"
+with open(path, "w") as f:
+    json.dump(data, f, indent=2, ensure_ascii=False)
+    f.write("\n")
+PYEOF
 
 # start.sh references the lesson path in its uvicorn invocation.
 sed_inplace "s|lessons\.lesson-01-cv-fundamentals\.|lessons.${SLUG//-/_TMP_}.|g" \
