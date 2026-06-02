@@ -1,7 +1,94 @@
-/* @import must precede @tailwind per CSS spec. Theme styles fenced code blocks
-   that rehype-highlight wraps in <code class="hljs language-..."> markup. */
-@import 'highlight.js/styles/github.css';
+/* @import must precede @tailwind per CSS spec. */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+@import 'highlight.js/styles/github-dark.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Base ─────────────────────────────────────────────────────────────── */
+body {
+  font-family: 'Share Tech Mono', 'Courier New', monospace;
+  background: #0a0f0a;
+}
+
+/* ── CRT scanlines overlay ────────────────────────────────────────────── */
+#root::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.12) 2px,
+    rgba(0, 0, 0, 0.12) 4px
+  );
+  z-index: 9999;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root::after { display: none; }
+}
+
+/* ── Phosphor glow utilities ──────────────────────────────────────────── */
+@layer utilities {
+  .glow {
+    text-shadow:
+      0 0 6px rgba(51, 255, 87, 0.8),
+      0 0 18px rgba(51, 255, 87, 0.3);
+  }
+  .glow-box {
+    box-shadow:
+      0 0 10px rgba(51, 255, 87, 0.10),
+      inset 0 0 8px rgba(51, 255, 87, 0.04);
+  }
+  .glow-box-active {
+    box-shadow: 0 0 14px rgba(51, 255, 87, 0.28);
+  }
+}
+
+/* ── Prose CRT override (Tailwind Typography CSS custom properties) ────── */
+.prose-crt {
+  --tw-prose-body:          #33ff57;
+  --tw-prose-headings:      #80ff9a;
+  --tw-prose-lead:          #4a9e5a;
+  --tw-prose-links:         #80ff9a;
+  --tw-prose-bold:          #80ff9a;
+  --tw-prose-counters:      #4a9e5a;
+  --tw-prose-bullets:       #1a3a1a;
+  --tw-prose-hr:            #1a3a1a;
+  --tw-prose-quotes:        #33ff57;
+  --tw-prose-quote-borders: #1a3a1a;
+  --tw-prose-captions:      #4a9e5a;
+  --tw-prose-code:          #80ff9a;
+  --tw-prose-pre-code:      #33ff57;
+  --tw-prose-pre-bg:        #0f1a0f;
+  --tw-prose-th-borders:    #1a3a1a;
+  --tw-prose-td-borders:    #1a3a1a;
+}
+
+/* Inline code chip styling inside prose */
+.prose-crt :where(code):not(:where([class~='not-prose'] *)) {
+  background: #0f1a0f;
+  border: 1px solid #1a3a1a;
+  padding: 0.1em 0.35em;
+  border-radius: 0.25rem;
+}
+
+/* ── highlight.js phosphor color override ─────────────────────────────── */
+.hljs                         { background: #0f1a0f !important; color: #33ff57 !important; }
+.hljs-keyword,
+.hljs-built_in                { color: #80ff9a !important; }
+.hljs-string, .hljs-literal   { color: #66cc77 !important; }
+.hljs-comment                 { color: #4a9e5a !important; font-style: italic; }
+.hljs-number, .hljs-params    { color: #33ff57 !important; }
+.hljs-title, .hljs-attr       { color: #80ff9a !important; font-weight: bold; }
+.hljs-type                    { color: #80ff9a !important; }
+
+/* ── Custom scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar            { width: 6px; height: 6px; }
+::-webkit-scrollbar-track      { background: #0a0f0a; }
+::-webkit-scrollbar-thumb      { background: #1a3a1a; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2d6a3a; }

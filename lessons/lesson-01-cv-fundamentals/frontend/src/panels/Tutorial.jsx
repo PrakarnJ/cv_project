@@ -37,20 +37,20 @@ export default function Tutorial() {
   const content = data?.content ?? ''
   const minutes = useMemo(() => readTime(content), [content])
 
-  if (isLoading) return <p className="text-slate-500">Loading tutorial…</p>
+  if (isLoading) return <p className="text-crt-muted">Loading tutorial…</p>
   if (isError)
     return (
-      <p className="text-red-600">
+      <p className="text-red-400">
         Failed to load tutorial: {error?.message ?? 'unknown error'}
       </p>
     )
 
   return (
     <article>
-      <div className="mb-4 flex items-center justify-between text-sm text-slate-500">
+      <div className="mb-4 flex items-center justify-between text-sm text-crt-muted">
         <span>{minutes} min read</span>
       </div>
-      <div className="prose prose-slate max-w-none">
+      <div className="prose prose-crt max-w-none">
         <ReactMarkdown
           remarkPlugins={REMARK_PLUGINS}
           rehypePlugins={REHYPE_PLUGINS}
@@ -63,7 +63,7 @@ export default function Tutorial() {
         <button
           type="button"
           onClick={() => setActiveTab('playground')}
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="rounded border border-crt-text px-4 py-2 text-sm font-medium text-crt-text transition-colors hover:bg-crt-text hover:text-crt-bg"
         >
           Next → Playground
         </button>

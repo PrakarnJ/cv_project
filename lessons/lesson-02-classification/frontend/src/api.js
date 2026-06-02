@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const api = axios.create({ baseURL: 'http://localhost:8000' })
+export const api = axios.create({ baseURL: 'http://localhost:8003' })
 
 export const getLesson = () => api.get('/lesson').then((r) => r.data)
 export const getTutorial = () => api.get('/tutorial').then((r) => r.data)

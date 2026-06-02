@@ -26,9 +26,9 @@ function readFileAsBase64(file) {
 function ParamSlider({ name, def, value, onChange }) {
   return (
     <label className="block text-sm">
-      <span className="flex justify-between text-slate-700">
-        <span>{name}</span>
-        <span className="font-mono text-slate-500">{value}</span>
+      <span className="flex justify-between">
+        <span className="text-crt-text">{name}</span>
+        <span className="font-mono text-crt-muted">{value}</span>
       </span>
       <input
         type="range"
@@ -39,7 +39,7 @@ function ParamSlider({ name, def, value, onChange }) {
         onChange={(e) =>
           onChange(def.type === 'int' ? Number(e.target.value) : parseFloat(e.target.value))
         }
-        className="w-full"
+        className="w-full accent-crt-text"
         aria-label={name}
       />
     </label>
@@ -49,8 +49,6 @@ function ParamSlider({ name, def, value, onChange }) {
 export default function Playground() {
   const { data: models = [] } = useQuery({ queryKey: ['models'], queryFn: getModels })
 
-  // User's explicit picks; null means "use the first model / its defaults".
-  // Deriving during render replaces the old default-setting useEffect.
   const [pickedModelName, setPickedModelName] = useState(null)
   const [pickedParams, setPickedParams] = useState(null)
 
@@ -67,7 +65,6 @@ export default function Playground() {
     setPickedParams(defaultsFor(next?.param_schema))
   }
 
-  // Image source: either uploaded file or captured webcam frame.
   const [imageBase64, setImageBase64] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(null)
   const {
@@ -96,7 +93,6 @@ export default function Playground() {
     }
   }
 
-  // Inference call and result drawing.
   const canvasRef = useRef(null)
   const inferMutation = useMutation({
     mutationFn: (payload) => infer(payload),
@@ -136,18 +132,18 @@ export default function Playground() {
       {/* Left column: controls */}
       <aside className="w-72 shrink-0 space-y-4">
         <div>
-          <h3 className="mb-2 text-sm font-medium text-slate-700">Input</h3>
+          <h3 className="mb-2 text-sm font-medium text-crt-muted">Input</h3>
           <input
             type="file"
             accept="image/*"
             onChange={onFileChange}
-            className="block w-full text-sm text-slate-600 file:mr-2 file:rounded file:border-0 file:bg-slate-200 file:px-3 file:py-1.5 file:text-sm file:text-slate-800 hover:file:bg-slate-300"
+            className="block w-full text-sm text-crt-muted file:mr-2 file:rounded file:border file:border-crt-border file:bg-crt-dim file:px-3 file:py-1.5 file:text-sm file:text-crt-text hover:file:bg-crt-border"
           />
           <div className="mt-2 flex gap-2">
             <button
               type="button"
               onClick={webcamActive ? stopWebcam : startWebcam}
-              className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-100"
+              className="rounded border border-crt-border px-3 py-1 text-sm text-crt-text transition-colors hover:bg-crt-dim"
             >
               {webcamActive ? 'Stop webcam' : 'Use webcam'}
             </button>
@@ -155,18 +151,18 @@ export default function Playground() {
               type="button"
               onClick={snapWebcam}
               disabled={!webcamActive}
-              className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-400"
+              className="rounded border border-crt-border px-3 py-1 text-sm text-crt-text transition-colors hover:bg-crt-dim disabled:cursor-not-allowed disabled:opacity-40"
             >
               Snap
             </button>
           </div>
           {webcamError && (
-            <p className="mt-1 text-xs text-red-600">{webcamError}</p>
+            <p className="mt-1 text-xs text-red-400">{webcamError}</p>
           )}
           <video
             ref={videoRef}
             className={
-              'mt-2 w-full rounded border border-slate-300 ' +
+              'mt-2 w-full rounded border border-crt-border ' +
               (webcamActive ? '' : 'hidden')
             }
             muted
@@ -176,17 +172,17 @@ export default function Playground() {
             <img
               src={previewUrl}
               alt="Selected input"
-              className="mt-2 w-full rounded border border-slate-300"
+              className="mt-2 w-full rounded border border-crt-border"
             />
           )}
         </div>
 
         <div>
-          <h3 className="mb-2 text-sm font-medium text-slate-700">Model</h3>
+          <h3 className="mb-2 text-sm font-medium text-crt-muted">Model</h3>
           <select
             value={modelName}
             onChange={(e) => chooseModel(e.target.value)}
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm"
+            className="w-full rounded border border-crt-border bg-crt-bg px-2 py-1.5 text-sm text-crt-text"
             aria-label="Model"
           >
             {models.map((m) => (
@@ -199,7 +195,7 @@ export default function Playground() {
 
         {selectedModel && (
           <div>
-            <h3 className="mb-2 text-sm font-medium text-slate-700">Parameters</h3>
+            <h3 className="mb-2 text-sm font-medium text-crt-muted">Parameters</h3>
             <div className="space-y-3">
               {Object.entries(selectedModel.param_schema).map(([key, def]) => (
                 <ParamSlider
@@ -218,13 +214,13 @@ export default function Playground() {
           type="button"
           onClick={onRun}
           disabled={runDisabled}
-          className="w-full rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="w-full rounded border border-crt-text bg-transparent px-4 py-2 text-sm font-medium text-crt-text transition-colors hover:bg-crt-text hover:text-crt-bg disabled:cursor-not-allowed disabled:border-crt-border disabled:opacity-40"
         >
           {inferMutation.isPending ? 'Running…' : 'Run ▶'}
         </button>
 
         {inferMutation.isError && (
-          <p className="text-sm text-red-600">
+          <p className="text-sm text-red-400">
             {inferMutation.error?.response?.data?.detail ??
               inferMutation.error?.message}
           </p>
@@ -233,30 +229,30 @@ export default function Playground() {
 
       {/* Right column: result */}
       <div className="min-w-0 flex-1">
-        <h3 className="mb-2 text-sm font-medium text-slate-700">Result</h3>
-        <div className="rounded border border-slate-200 bg-white p-3">
+        <h3 className="mb-2 text-sm font-medium text-crt-muted">Result</h3>
+        <div className="rounded border border-crt-border bg-crt-surface p-3 glow-box">
           <canvas
             ref={canvasRef}
             className="max-h-[600px] w-full object-contain"
           />
           {!result && (
-            <p className="py-12 text-center text-sm text-slate-400">
+            <p className="py-12 text-center text-sm text-crt-muted">
               Upload an image (or capture from webcam) and press Run.
             </p>
           )}
         </div>
         {result && (
-          <dl className="mt-3 grid grid-cols-3 gap-2 text-sm text-slate-600">
+          <dl className="mt-3 grid grid-cols-3 gap-2 text-sm text-crt-text">
             <div>
-              <dt className="text-slate-400">Detections</dt>
+              <dt className="text-crt-muted">Detections</dt>
               <dd>{result.detections.length}</dd>
             </div>
             <div>
-              <dt className="text-slate-400">Inference</dt>
+              <dt className="text-crt-muted">Inference</dt>
               <dd>{result.inference_ms.toFixed(1)} ms</dd>
             </div>
             <div>
-              <dt className="text-slate-400">Model</dt>
+              <dt className="text-crt-muted">Model</dt>
               <dd className="font-mono text-xs">{result.model}</dd>
             </div>
           </dl>

@@ -15,7 +15,7 @@ const TYPE_LABEL = { fill_blank: 'A', scratch: 'B', tweak: 'C' }
 
 function TypeBadge({ type }) {
   return (
-    <span className="ml-1 rounded bg-slate-200 px-1.5 py-0.5 font-mono text-[10px] uppercase text-slate-600">
+    <span className="ml-1 rounded border border-crt-border bg-crt-dim px-1.5 py-0.5 font-mono text-[10px] uppercase text-crt-muted">
       {TYPE_LABEL[type] ?? '?'}
     </span>
   )
@@ -23,22 +23,22 @@ function TypeBadge({ type }) {
 
 function ConfirmModal({ title, body, onConfirm, onCancel }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-96 rounded bg-white p-5 shadow-xl">
-        <h3 className="text-base font-medium text-slate-900">{title}</h3>
-        <p className="mt-2 text-sm text-slate-600">{body}</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="w-96 rounded border border-crt-border bg-crt-surface p-5 glow-box">
+        <h3 className="text-base font-medium text-crt-text">{title}</h3>
+        <p className="mt-2 text-sm text-crt-muted">{body}</p>
         <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"
             onClick={onCancel}
-            className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-100"
+            className="rounded border border-crt-border px-3 py-1 text-sm text-crt-muted transition-colors hover:bg-crt-dim"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
+            className="rounded border border-red-700 px-3 py-1 text-sm font-medium text-red-400 transition-colors hover:bg-red-900/30"
           >
             Show me
           </button>
@@ -50,29 +50,64 @@ function ConfirmModal({ title, body, onConfirm, onCancel }) {
 
 function TestOutput({ lines, summary, running }) {
   return (
-    <pre className="mt-3 max-h-72 overflow-auto rounded bg-slate-900 p-3 font-mono text-xs leading-relaxed text-slate-100">
+    <pre className="mt-3 max-h-72 overflow-auto rounded border border-crt-border bg-crt-bg p-3 font-mono text-xs leading-relaxed text-crt-muted">
       {lines.length === 0 && !running && (
-        <span className="text-slate-500">Press Run tests to see output.</span>
+        <span className="text-crt-border">Press Run tests to see output.</span>
       )}
       {lines.map((line, i) => {
-        let color = 'text-slate-200'
-        if (line.includes(' PASSED')) color = 'text-green-400'
+        let color = 'text-crt-muted'
+        if (line.includes(' PASSED')) color = 'text-crt-text glow'
         else if (line.includes(' FAILED')) color = 'text-red-400'
-        else if (line.startsWith('=')) color = 'text-slate-400'
+        else if (line.startsWith('=')) color = 'text-crt-border'
         return (
           <div key={i} className={color}>
-            {line || ' '}
+            {line || ' '}
           </div>
         )
       })}
       {summary && (
-        <div className="mt-2 border-t border-slate-700 pt-2 text-slate-300">
+        <div className="mt-2 border-t border-crt-border pt-2 text-crt-muted">
           {summary.passed.length} passed · {summary.failed.length} failed
         </div>
       )}
-      {running && <div className="mt-2 text-slate-400">Running…</div>}
+      {running && <div className="mt-2 text-crt-muted">Running…</div>}
     </pre>
   )
+}
+
+function crtBeforeMount(monaco) {
+  monaco.editor.defineTheme('crt-green', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [
+      { token: 'comment',         foreground: '4a9e5a', fontStyle: 'italic' },
+      { token: 'keyword',         foreground: '80ff9a', fontStyle: 'bold' },
+      { token: 'string',          foreground: '66cc77' },
+      { token: 'string.escape',   foreground: '80ff9a' },
+      { token: 'number',          foreground: '80ff9a' },
+      { token: 'type.identifier', foreground: '33ff57' },
+      { token: 'delimiter',       foreground: '2d6a3a' },
+      { token: 'operator',        foreground: '4a9e5a' },
+    ],
+    colors: {
+      'editor.background':                   '#0f1a0f',
+      'editor.foreground':                   '#33ff57',
+      'editor.lineHighlightBackground':      '#141f14',
+      'editor.selectionBackground':          '#1a3a1a',
+      'editorCursor.foreground':             '#33ff57',
+      'editorLineNumber.foreground':         '#2d6a3a',
+      'editorLineNumber.activeForeground':   '#4a9e5a',
+      'editor.selectionHighlightBackground': '#1a3a1a80',
+      'editorIndentGuide.background1':       '#1a3a1a',
+      'scrollbarSlider.background':          '#1a3a1a80',
+      'scrollbarSlider.hoverBackground':     '#2d6a3a80',
+      'editorWidget.background':             '#0f1a0f',
+      'editorWidget.border':                 '#1a3a1a',
+      'input.background':                    '#0a0f0a',
+      'input.foreground':                    '#33ff57',
+      'input.border':                        '#1a3a1a',
+    },
+  })
 }
 
 function CodeExercise({ exercise }) {
@@ -84,10 +119,6 @@ function CodeExercise({ exercise }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['progress'] }),
   })
 
-  // Local buffer for the editor; debounce-flush into the store so we don't
-  // hammer localStorage on every keystroke. The parent remounts this
-  // component on exercise change (via key={exercise.id}), so initial state
-  // is recomputed from the freshly-loaded starter without a sync effect.
   const persisted = exerciseCode[exercise.id]
   const [draft, setDraft] = useState(persisted ?? exercise.starter_code ?? '')
 
@@ -96,7 +127,6 @@ function CodeExercise({ exercise }) {
     return () => clearTimeout(handle)
   }, [draft, exercise.id, setExerciseCode])
 
-  // SSE state
   const [lines, setLines] = useState([])
   const [summary, setSummary] = useState(null)
   const [running, setRunning] = useState(false)
@@ -139,27 +169,29 @@ function CodeExercise({ exercise }) {
     }
   }
 
-  // Hint / solution UI
   const [hintIdx, setHintIdx] = useState(-1)
   const hints = exercise.hints ?? []
   const [showSolutionModal, setShowSolutionModal] = useState(false)
   const solutionQuery = useQuery({
     queryKey: ['solution', exercise.id],
     queryFn: () => getSolution(exercise.id),
-    enabled: false, // only fetch after the modal is confirmed
+    enabled: false,
   })
 
   return (
     <>
-      <div className="mb-2 rounded border border-slate-200 bg-white">
+      <div className="mb-2 rounded border border-crt-border glow-box">
         <Editor
           height="420px"
           language="python"
+          theme="crt-green"
           value={draft}
           onChange={(v) => setDraft(v ?? '')}
+          beforeMount={crtBeforeMount}
           options={{
             minimap: { enabled: false },
             fontSize: 13,
+            fontFamily: '"Share Tech Mono", "Courier New", monospace',
             scrollBeyondLastLine: false,
             tabSize: 4,
             insertSpaces: true,
@@ -173,7 +205,7 @@ function CodeExercise({ exercise }) {
           type="button"
           onClick={runTests}
           disabled={running}
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-slate-300"
+          className="rounded border border-crt-text px-4 py-2 text-sm font-medium text-crt-text transition-colors hover:bg-crt-text hover:text-crt-bg disabled:border-crt-border disabled:opacity-40"
         >
           {running ? 'Running…' : 'Run tests ▶'}
         </button>
@@ -182,21 +214,21 @@ function CodeExercise({ exercise }) {
           onClick={() =>
             setHintIdx((i) => (hints.length === 0 ? -1 : Math.min(i + 1, hints.length - 1)))
           }
-          className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+          className="rounded border border-crt-border px-3 py-2 text-sm text-crt-muted transition-colors hover:bg-crt-dim"
         >
           Hint
         </button>
         <button
           type="button"
           onClick={() => setShowSolutionModal(true)}
-          className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+          className="rounded border border-crt-border px-3 py-2 text-sm text-crt-muted transition-colors hover:bg-crt-dim"
         >
           Show solution
         </button>
       </div>
 
       {hintIdx >= 0 && (
-        <p className="mt-2 rounded bg-amber-50 px-3 py-2 text-sm text-amber-900">
+        <p className="mt-2 rounded border border-crt-text bg-crt-surface px-3 py-2 text-sm text-crt-muted">
           {hints.length === 0
             ? 'No hints available for this exercise.'
             : `Hint ${hintIdx + 1}/${hints.length}: ${hints[hintIdx]}`}
@@ -204,12 +236,12 @@ function CodeExercise({ exercise }) {
       )}
 
       {solutionQuery.data && (
-        <pre className="hljs mt-2 max-h-72 overflow-auto rounded bg-slate-900 p-3 font-mono text-xs text-slate-100">
+        <pre className="hljs mt-2 max-h-72 overflow-auto rounded border border-crt-border bg-crt-bg p-3 font-mono text-xs text-crt-text">
           <code className="language-python">{solutionQuery.data.code}</code>
         </pre>
       )}
       {solutionQuery.isError && (
-        <p className="mt-2 text-sm text-red-600">
+        <p className="mt-2 text-sm text-red-400">
           {solutionQuery.error?.response?.data?.detail ??
             solutionQuery.error?.message ??
             'Failed to load solution'}
@@ -217,7 +249,7 @@ function CodeExercise({ exercise }) {
       )}
 
       {streamError && (
-        <p className="mt-2 text-sm text-red-600">{streamError}</p>
+        <p className="mt-2 text-sm text-red-400">{streamError}</p>
       )}
 
       <TestOutput lines={lines} summary={summary} running={running} />
@@ -245,17 +277,17 @@ function TweakExercise({ exercise }) {
   )
   return (
     <section className="space-y-4">
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-crt-muted">
         This exercise is exploratory — work in the{' '}
         <button
           type="button"
           onClick={() => setActiveTab('playground')}
-          className="font-medium text-blue-600 hover:underline"
+          className="font-medium text-crt-bright hover:underline"
         >
           Playground
         </button>{' '}
         with model{' '}
-        <code className="rounded bg-slate-100 px-1 font-mono text-xs text-slate-700">
+        <code className="rounded border border-crt-border bg-crt-surface px-1 font-mono text-xs text-crt-text">
           {exercise.playground_model}
         </code>{' '}
         and reflect below.
@@ -265,14 +297,14 @@ function TweakExercise({ exercise }) {
         <ul className="space-y-2">
           {exercise.self_checks.map((label, i) => (
             <li key={i}>
-              <label className="inline-flex items-start gap-2 text-sm text-slate-700">
+              <label className="inline-flex items-start gap-2 text-sm text-crt-text">
                 <input
                   type="checkbox"
                   checked={checks[i]}
                   onChange={(e) =>
                     setChecks((prev) => prev.map((c, j) => (j === i ? e.target.checked : c)))
                   }
-                  className="mt-0.5"
+                  className="mt-0.5 accent-crt-text"
                 />
                 <span>{label}</span>
               </label>
@@ -282,17 +314,17 @@ function TweakExercise({ exercise }) {
       )}
 
       <label className="block text-sm">
-        <span className="text-slate-700">Reflection</span>
+        <span className="text-crt-text">Reflection</span>
         <textarea
           value={reflection}
           onChange={(e) => setReflection(e.target.value)}
           rows={4}
-          className="mt-1 w-full rounded border border-slate-300 p-2 text-sm"
+          className="mt-1 w-full rounded border border-crt-border bg-crt-bg p-2 text-sm text-crt-text placeholder-crt-muted focus:border-crt-text focus:outline-none"
           placeholder="One sentence on what surprised you, or what you learned…"
         />
       </label>
 
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-crt-muted">
         Self-check + reflection persistence is wired through the Progress tab (T2.7).
       </p>
     </section>
@@ -308,7 +340,6 @@ export default function Exercises() {
   const activeId = useLessonStore((s) => s.activeExerciseId)
   const setActiveId = useLessonStore((s) => s.setActiveExerciseId)
 
-  // Ensure activeId is one of the listed exercises once they load.
   useEffect(() => {
     if (list.length > 0 && !list.some((e) => e.id === activeId)) {
       setActiveId(list[0].id)
@@ -338,10 +369,10 @@ export default function Exercises() {
                 type="button"
                 onClick={() => setActiveId(e.id)}
                 className={
-                  'inline-flex items-center rounded-full border px-3 py-1 ' +
+                  'inline-flex items-center rounded-full border px-3 py-1 transition-colors ' +
                   (active
-                    ? 'border-blue-600 bg-blue-50 text-blue-700'
-                    : 'border-slate-300 text-slate-600 hover:bg-slate-100')
+                    ? 'border-crt-text bg-crt-dim text-crt-text glow'
+                    : 'border-crt-border text-crt-muted hover:bg-crt-dim')
                 }
               >
                 Exercise {i + 1}
@@ -354,10 +385,10 @@ export default function Exercises() {
 
       {exercise && (
         <>
-          <h2 className="mb-1 text-xl font-medium text-slate-900">
+          <h2 className="mb-1 text-xl font-medium text-crt-text glow">
             {idx + 1} of {list.length}: {exercise.title}
           </h2>
-          <p className="mb-4 text-sm text-slate-500">
+          <p className="mb-4 text-sm text-crt-muted">
             Type {TYPE_LABEL[exercise.type]} ·{' '}
             {exercise.type === 'fill_blank' && 'Fill in the blanks.'}
             {exercise.type === 'scratch' && 'Implement from scratch.'}

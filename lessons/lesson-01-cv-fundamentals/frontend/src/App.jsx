@@ -24,7 +24,7 @@ function AppShell() {
   const activeTab = useLessonStore((s) => s.activeTab)
   const ActivePanel = PANELS[activeTab] ?? Tutorial
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-crt-bg font-mono text-crt-text">
       <TopBar />
       <TabBar />
       <main className="mx-auto max-w-5xl px-6 py-8">

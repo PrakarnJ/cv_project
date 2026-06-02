@@ -10,23 +10,21 @@ import {
 
 const LESSON_KEY = 'lesson-02'
 
-// Hardcoded expected test totals for the two coding exercises. Once
-// hints/test_count metadata lands in lesson.config.json this can be derived.
 const EXPECTED_TESTS = { ex1: 2, ex2: 3 }
 
 function Bar({ label, value, total }) {
   const pct = total === 0 ? 0 : Math.round((value / total) * 100)
   return (
     <div>
-      <div className="mb-1 flex items-center justify-between text-sm text-slate-600">
+      <div className="mb-1 flex items-center justify-between text-sm text-crt-text">
         <span>{label}</span>
-        <span className="font-mono text-xs text-slate-500">
+        <span className="font-mono text-xs text-crt-muted">
           {value} / {total} ({pct}%)
         </span>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded bg-slate-200">
+      <div className="h-2 w-full overflow-hidden rounded bg-crt-dim">
         <div
-          className="h-full rounded bg-blue-600 transition-[width]"
+          className="h-full rounded bg-crt-text transition-[width]"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -74,7 +72,6 @@ export default function Progress() {
     [progress],
   )
 
-  // -- Auto-tests bar -----------------------------------------------------
   const autoTotals = useMemo(() => {
     const total = Object.values(EXPECTED_TESTS).reduce((a, b) => a + b, 0)
     let passed = 0
@@ -85,7 +82,6 @@ export default function Progress() {
     return { passed, total }
   }, [lessonProgress])
 
-  // -- Self-check totals --------------------------------------------------
   const globalChecksFromConfig = useMemo(
     () => lesson?.self_checks_global ?? [],
     [lesson],
@@ -95,9 +91,6 @@ export default function Progress() {
     [exercises],
   )
 
-  // Display values are derived directly from the React Query cache; there
-  // is no local mirror. Toggle handlers patch the cache for an instant
-  // response and let the debounced mutation flush to disk.
   const globalChecks = useMemo(
     () =>
       globalChecksFromConfig.map(
@@ -167,7 +160,6 @@ export default function Progress() {
     })
   }
 
-  // -- Mark complete ------------------------------------------------------
   const markComplete = useMutation({
     mutationFn: () =>
       updateProgress({
@@ -185,17 +177,17 @@ export default function Progress() {
   return (
     <section className="space-y-6">
       <header>
-        <h2 className="text-xl font-medium text-slate-900">
+        <h2 className="text-xl font-medium text-crt-text glow">
           {lesson ? `Lesson 02 — ${lesson.title}` : 'Progress'}
         </h2>
         {lessonProgress.completed_at && (
-          <p className="mt-1 text-sm text-green-700">
+          <p className="mt-1 text-sm text-crt-bright">
             Completed {new Date(lessonProgress.completed_at).toLocaleString()}.
           </p>
         )}
       </header>
 
-      <div className="space-y-4 rounded border border-slate-200 bg-white p-4">
+      <div className="space-y-4 rounded border border-crt-border bg-crt-surface p-4 glow-box">
         <Bar
           label="Auto tests"
           value={autoTotals.passed}
@@ -210,18 +202,18 @@ export default function Progress() {
 
       {globalChecksFromConfig.length > 0 && (
         <div>
-          <h3 className="mb-2 text-sm font-medium text-slate-700">
+          <h3 className="mb-2 text-sm font-medium text-crt-muted">
             Self-check checklist
           </h3>
           <ul className="space-y-2">
             {globalChecksFromConfig.map((label, i) => (
               <li key={i}>
-                <label className="inline-flex items-start gap-2 text-sm text-slate-700">
+                <label className="inline-flex items-start gap-2 text-sm text-crt-text">
                   <input
                     type="checkbox"
                     checked={globalChecks[i] ?? false}
                     onChange={(e) => toggleGlobal(i, e.target.checked)}
-                    className="mt-0.5"
+                    className="mt-0.5 accent-crt-text"
                   />
                   <span>{label}</span>
                 </label>
@@ -233,20 +225,20 @@ export default function Progress() {
 
       {tweakExercises.map((ex) => (
         <div key={ex.id}>
-          <h3 className="mb-2 text-sm font-medium text-slate-700">
+          <h3 className="mb-2 text-sm font-medium text-crt-muted">
             {ex.title} (self-checks)
           </h3>
           <ul className="space-y-2">
             {(ex.self_checks ?? []).map((label, i) => (
               <li key={i}>
-                <label className="inline-flex items-start gap-2 text-sm text-slate-700">
+                <label className="inline-flex items-start gap-2 text-sm text-crt-text">
                   <input
                     type="checkbox"
                     checked={exerciseChecks[ex.id]?.[i] ?? false}
                     onChange={(e) =>
                       toggleExerciseCheck(ex.id, i, e.target.checked)
                     }
-                    className="mt-0.5"
+                    className="mt-0.5 accent-crt-text"
                   />
                   <span>{label}</span>
                 </label>
@@ -261,12 +253,12 @@ export default function Progress() {
           type="button"
           onClick={() => markComplete.mutate()}
           disabled={!canComplete || markComplete.isPending}
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="rounded border border-crt-text px-4 py-2 text-sm font-medium text-crt-text transition-colors hover:bg-crt-text hover:text-crt-bg disabled:cursor-not-allowed disabled:border-crt-border disabled:opacity-40"
         >
           Mark lesson complete →
         </button>
         {!canComplete && (
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-crt-muted">
             Pass all tests and tick every self-check to enable this.
           </p>
         )}

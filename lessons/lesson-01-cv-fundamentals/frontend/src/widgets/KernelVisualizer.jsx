@@ -1,8 +1,5 @@
 import { useMemo, useState } from 'react'
 
-// Placeholder concept widget — renders a 1-D Gaussian kernel as a row of cells
-// whose opacity reflects the weight. Helps explain why neighbours nearer the
-// centre contribute more than those at the edges.
 function gaussianWeights(k, sigma) {
   const r = Math.floor(k / 2)
   const weights = []
@@ -18,9 +15,9 @@ export default function KernelVisualizer() {
   const [sigma, setSigma] = useState(1.5)
   const weights = useMemo(() => gaussianWeights(size, sigma), [size, sigma])
   return (
-    <div className="not-prose my-4 rounded border border-slate-200 bg-slate-50 p-4">
+    <div className="not-prose my-4 rounded border border-crt-border bg-crt-surface p-4 glow-box">
       <div className="mb-3 grid grid-cols-2 gap-3">
-        <label className="text-sm text-slate-700">
+        <label className="text-sm text-crt-text">
           Kernel size: {size}
           <input
             type="range"
@@ -29,10 +26,10 @@ export default function KernelVisualizer() {
             step={2}
             value={size}
             onChange={(e) => setSize(Number(e.target.value))}
-            className="w-full"
+            className="w-full accent-crt-text"
           />
         </label>
-        <label className="text-sm text-slate-700">
+        <label className="text-sm text-crt-text">
           Sigma: {sigma.toFixed(2)}
           <input
             type="range"
@@ -41,7 +38,7 @@ export default function KernelVisualizer() {
             step={0.1}
             value={sigma}
             onChange={(e) => setSigma(Number(e.target.value))}
-            className="w-full"
+            className="w-full accent-crt-text"
           />
         </label>
       </div>
@@ -49,11 +46,11 @@ export default function KernelVisualizer() {
         {weights.map((w, i) => (
           <div key={i} className="flex flex-col items-center">
             <div
-              className="h-10 w-10 rounded border border-slate-300 bg-blue-600"
+              className="h-10 w-10 rounded border border-crt-border bg-crt-text"
               style={{ opacity: w / Math.max(...weights) }}
               title={w.toFixed(3)}
             />
-            <span className="mt-1 font-mono text-xs text-slate-500">
+            <span className="mt-1 font-mono text-xs text-crt-muted">
               {w.toFixed(2)}
             </span>
           </div>

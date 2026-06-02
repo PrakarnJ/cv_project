@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 
-// Placeholder concept widget — re-blurs a tiny synthetic image client-side so
-// the slider has an immediate visible effect. T3.2 may swap in a richer demo.
 const SIZE = 80
 
 function generateInput(ctx) {
@@ -9,7 +7,6 @@ function generateInput(ctx) {
   for (let y = 0; y < SIZE; y++) {
     for (let x = 0; x < SIZE; x++) {
       const i = (y * SIZE + x) * 4
-      // Diagonal stripes so blur produces an obvious smearing effect.
       const v = ((x + y) % 16 < 8 ? 30 : 220) + Math.floor(Math.random() * 10)
       img.data[i] = v
       img.data[i + 1] = v
@@ -66,9 +63,9 @@ export default function ConvolutionDemo() {
   }, [kernel])
 
   return (
-    <div className="not-prose my-4 rounded border border-slate-200 bg-slate-50 p-4">
+    <div className="not-prose my-4 rounded border border-crt-border bg-crt-surface p-4 glow-box">
       <div className="mb-3 flex items-center gap-3">
-        <label className="text-sm font-medium text-slate-700">
+        <label className="text-sm font-medium text-crt-text">
           Kernel size: {kernel}
         </label>
         <input
@@ -78,7 +75,7 @@ export default function ConvolutionDemo() {
           step={2}
           value={kernel}
           onChange={(e) => setKernel(Number(e.target.value))}
-          className="flex-1"
+          className="flex-1 accent-crt-text"
           aria-label="Kernel size"
         />
       </div>
@@ -88,9 +85,9 @@ export default function ConvolutionDemo() {
             ref={inputRef}
             width={SIZE}
             height={SIZE}
-            className="border border-slate-300 [image-rendering:pixelated]"
+            className="border border-crt-border [image-rendering:pixelated]"
           />
-          <figcaption className="mt-1 text-center text-xs text-slate-500">
+          <figcaption className="mt-1 text-center text-xs text-crt-muted">
             input
           </figcaption>
         </figure>
@@ -99,9 +96,9 @@ export default function ConvolutionDemo() {
             ref={outputRef}
             width={SIZE}
             height={SIZE}
-            className="border border-slate-300 [image-rendering:pixelated]"
+            className="border border-crt-border [image-rendering:pixelated]"
           />
-          <figcaption className="mt-1 text-center text-xs text-slate-500">
+          <figcaption className="mt-1 text-center text-xs text-crt-muted">
             blurred
           </figcaption>
         </figure>

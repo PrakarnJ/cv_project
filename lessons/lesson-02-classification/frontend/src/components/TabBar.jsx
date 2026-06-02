@@ -12,7 +12,7 @@ export default function TabBar() {
   const setActiveTab = useLessonStore((s) => s.setActiveTab)
   return (
     <nav
-      className="border-b border-slate-200 bg-white px-6"
+      className="border-b border-crt-border bg-crt-surface px-6"
       aria-label="Lesson sections"
     >
       <ul className="flex gap-6">
@@ -27,8 +27,8 @@ export default function TabBar() {
                 className={
                   'inline-flex items-center border-b-2 px-1 py-3 text-sm font-medium transition ' +
                   (active
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900')
+                    ? 'border-crt-text text-crt-text glow'
+                    : 'border-transparent text-crt-muted hover:text-crt-text')
                 }
               >
                 {tab.label}
