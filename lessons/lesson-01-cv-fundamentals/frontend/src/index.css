@@ -1,6 +1,5 @@
 /* @import must precede @tailwind per CSS spec. */
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-@import 'highlight.js/styles/github-dark.css';
+@import 'highlight.js/styles/atom-one-dark.css';
 
 @tailwind base;
 @tailwind components;
@@ -8,87 +7,89 @@
 
 /* ── Base ─────────────────────────────────────────────────────────────── */
 body {
-  font-family: 'Share Tech Mono', 'Courier New', monospace;
-  background: #0a0f0a;
+  background: #0B0F19;
+  color: #F8FAFC;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── CRT scanlines overlay ────────────────────────────────────────────── */
-#root::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 2px,
-    rgba(0, 0, 0, 0.12) 2px,
-    rgba(0, 0, 0, 0.12) 4px
-  );
-  z-index: 9999;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #root::after { display: none; }
-}
-
-/* ── Phosphor glow utilities ──────────────────────────────────────────── */
-@layer utilities {
-  .glow {
-    text-shadow:
-      0 0 6px rgba(51, 255, 87, 0.8),
-      0 0 18px rgba(51, 255, 87, 0.3);
+/* ── Smooth interactive transitions + accessible focus ring ───────────── */
+@layer base {
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  [role='button'],
+  [role='tab'],
+  [role='checkbox'] {
+    transition-property: background-color, border-color, color, box-shadow,
+      opacity, transform;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
+  :focus-visible {
+    outline: 2px solid #6366F1;
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+  }
+}
+
+/* ── Elevation utilities (replacing the old phosphor glow) ────────────── */
+@layer utilities {
+  /* Subtle indigo emphasis for active text (active tab, lesson title). */
+  .glow {
+    text-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+  }
+  /* Card elevation: hairline rim + soft layered shadow. */
   .glow-box {
     box-shadow:
-      0 0 10px rgba(51, 255, 87, 0.10),
-      inset 0 0 8px rgba(51, 255, 87, 0.04);
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.04),
+      0 1px 3px 0 rgba(0, 0, 0, 0.4),
+      0 1px 2px -1px rgba(0, 0, 0, 0.5);
   }
+  /* Focused/promoted card. */
   .glow-box-active {
-    box-shadow: 0 0 14px rgba(51, 255, 87, 0.28);
+    box-shadow:
+      0 0 0 1px rgba(99, 102, 241, 0.4),
+      0 8px 24px -8px rgba(99, 102, 241, 0.25);
   }
 }
 
-/* ── Prose CRT override (Tailwind Typography CSS custom properties) ────── */
+/* ── Prose (Tailwind Typography) — premium dark palette ───────────────── */
 .prose-crt {
-  --tw-prose-body:          #33ff57;
-  --tw-prose-headings:      #80ff9a;
-  --tw-prose-lead:          #4a9e5a;
-  --tw-prose-links:         #80ff9a;
-  --tw-prose-bold:          #80ff9a;
-  --tw-prose-counters:      #4a9e5a;
-  --tw-prose-bullets:       #1a3a1a;
-  --tw-prose-hr:            #1a3a1a;
-  --tw-prose-quotes:        #33ff57;
-  --tw-prose-quote-borders: #1a3a1a;
-  --tw-prose-captions:      #4a9e5a;
-  --tw-prose-code:          #80ff9a;
-  --tw-prose-pre-code:      #33ff57;
-  --tw-prose-pre-bg:        #0f1a0f;
-  --tw-prose-th-borders:    #1a3a1a;
-  --tw-prose-td-borders:    #1a3a1a;
+  --tw-prose-body:          #F8FAFC;
+  --tw-prose-headings:      #F8FAFC;
+  --tw-prose-lead:          #94A3B8;
+  --tw-prose-links:         #818CF8;
+  --tw-prose-bold:          #F8FAFC;
+  --tw-prose-counters:      #94A3B8;
+  --tw-prose-bullets:       #334155;
+  --tw-prose-hr:            rgba(255, 255, 255, 0.08);
+  --tw-prose-quotes:        #F8FAFC;
+  --tw-prose-quote-borders: rgba(255, 255, 255, 0.08);
+  --tw-prose-captions:      #94A3B8;
+  --tw-prose-code:          #A5B4FC;
+  --tw-prose-pre-code:      #E2E8F0;
+  --tw-prose-pre-bg:        #161B26;
+  --tw-prose-th-borders:    rgba(255, 255, 255, 0.08);
+  --tw-prose-td-borders:    rgba(255, 255, 255, 0.05);
 }
 
 /* Inline code chip styling inside prose */
 .prose-crt :where(code):not(:where([class~='not-prose'] *)) {
-  background: #0f1a0f;
-  border: 1px solid #1a3a1a;
+  background: #161B26;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 0.1em 0.35em;
   border-radius: 0.25rem;
+  font-weight: 500;
 }
 
-/* ── highlight.js phosphor color override ─────────────────────────────── */
-.hljs                         { background: #0f1a0f !important; color: #33ff57 !important; }
-.hljs-keyword,
-.hljs-built_in                { color: #80ff9a !important; }
-.hljs-string, .hljs-literal   { color: #66cc77 !important; }
-.hljs-comment                 { color: #4a9e5a !important; font-style: italic; }
-.hljs-number, .hljs-params    { color: #33ff57 !important; }
-.hljs-title, .hljs-attr       { color: #80ff9a !important; font-weight: bold; }
-.hljs-type                    { color: #80ff9a !important; }
+/* highlight.js: match the prose code-block background to our surface tone */
+.hljs { background: #161B26 !important; }
 
-/* ── Custom scrollbar ─────────────────────────────────────────────────── */
-::-webkit-scrollbar            { width: 6px; height: 6px; }
-::-webkit-scrollbar-track      { background: #0a0f0a; }
-::-webkit-scrollbar-thumb      { background: #1a3a1a; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #2d6a3a; }
+/* ── Custom scrollbar — subtle, transparent track ─────────────────────── */
+::-webkit-scrollbar             { width: 8px; height: 8px; }
+::-webkit-scrollbar-track       { background: transparent; }
+::-webkit-scrollbar-thumb       { background: rgba(255, 255, 255, 0.08); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.16); }

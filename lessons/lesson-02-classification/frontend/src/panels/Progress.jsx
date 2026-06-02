@@ -24,7 +24,7 @@ function Bar({ label, value, total }) {
       </div>
       <div className="h-2 w-full overflow-hidden rounded bg-crt-dim">
         <div
-          className="h-full rounded bg-crt-text transition-[width]"
+          className="h-full rounded bg-crt-accent transition-[width]"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -253,7 +253,7 @@ export default function Progress() {
           type="button"
           onClick={() => markComplete.mutate()}
           disabled={!canComplete || markComplete.isPending}
-          className="rounded border border-crt-text px-4 py-2 text-sm font-medium text-crt-text transition-colors hover:bg-crt-text hover:text-crt-bg disabled:cursor-not-allowed disabled:border-crt-border disabled:opacity-40"
+          className="rounded bg-crt-accent px-4 py-2 text-sm font-medium text-crt-text hover:bg-crt-accent-hover disabled:cursor-not-allowed disabled:bg-crt-dim disabled:text-crt-disabled disabled:opacity-60"
         >
           Mark lesson complete →
         </button>

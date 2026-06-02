@@ -63,7 +63,7 @@ export default function Tutorial() {
         <button
           type="button"
           onClick={() => setActiveTab('playground')}
-          className="rounded border border-crt-text px-4 py-2 text-sm font-medium text-crt-text transition-colors hover:bg-crt-text hover:text-crt-bg"
+          className="rounded bg-crt-accent px-4 py-2 text-sm font-medium text-crt-text hover:bg-crt-accent-hover"
         >
           Next → Playground
         </button>

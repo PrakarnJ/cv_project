@@ -214,7 +214,7 @@ export default function Playground() {
           type="button"
           onClick={onRun}
           disabled={runDisabled}
-          className="w-full rounded border border-crt-text bg-transparent px-4 py-2 text-sm font-medium text-crt-text transition-colors hover:bg-crt-text hover:text-crt-bg disabled:cursor-not-allowed disabled:border-crt-border disabled:opacity-40"
+          className="w-full rounded bg-crt-accent px-4 py-2 text-sm font-medium text-crt-text hover:bg-crt-accent-hover disabled:cursor-not-allowed disabled:bg-crt-dim disabled:text-crt-disabled disabled:opacity-60"
         >
           {inferMutation.isPending ? 'Running…' : 'Run ▶'}
         </button>

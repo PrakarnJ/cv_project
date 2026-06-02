@@ -27,7 +27,7 @@ export default function TabBar() {
                 className={
                   'inline-flex items-center border-b-2 px-1 py-3 text-sm font-medium transition ' +
                   (active
-                    ? 'border-crt-text text-crt-text glow'
+                    ? 'border-crt-accent text-crt-text glow'
                     : 'border-transparent text-crt-muted hover:text-crt-text')
                 }
               >

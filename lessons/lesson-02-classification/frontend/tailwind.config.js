@@ -10,17 +10,28 @@ export default {
     extend: {
       colors: {
         crt: {
-          bg:      '#0a0f0a',
-          surface: '#0f1a0f',
-          border:  '#1a3a1a',
-          dim:     '#1f4a2a',
-          muted:   '#4a9e5a',
-          text:    '#33ff57',
-          bright:  '#80ff9a',
+          // Surfaces — rich desaturated dark, no pure black. Successive
+          // tones lighten to simulate elevation (page → card → hover).
+          bg:      '#0B0F19',
+          surface: '#161B26',
+          dim:     '#1F2937',
+
+          // Borders — translucent white so they fade gracefully on any
+          // surface tone and don't read as harsh dividers.
+          border:  'rgba(255, 255, 255, 0.08)',
+
+          // Typography — off-white primary, muted gray secondary,
+          // dim gray for disabled state.
+          text:     '#F8FAFC',
+          muted:    '#94A3B8',
+          disabled: '#64748B',
+
+          // Accents — indigo for interactive (buttons, focus rings,
+          // active tabs), emerald for positive/success states.
+          accent:        '#6366F1',
+          'accent-hover': '#4F46E5',
+          bright:        '#10B981',
         },
-      },
-      fontFamily: {
-        mono: ['"Share Tech Mono"', '"Courier New"', 'monospace'],
       },
     },
   },

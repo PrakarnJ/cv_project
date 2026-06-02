@@ -9,7 +9,7 @@ export default function ProgressDots({ total, active }) {
           key={i}
           className={
             'inline-block h-2 w-2 rounded-full ' +
-            (i < active ? 'bg-crt-text' : 'bg-crt-border')
+            (i < active ? 'bg-crt-accent' : 'bg-crt-border')
           }
         />
       ))}

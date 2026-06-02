@@ -205,7 +205,7 @@ function CodeExercise({ exercise }) {
           type="button"
           onClick={runTests}
           disabled={running}
-          className="rounded border border-crt-text px-4 py-2 text-sm font-medium text-crt-text transition-colors hover:bg-crt-text hover:text-crt-bg disabled:border-crt-border disabled:opacity-40"
+          className="rounded bg-crt-accent px-4 py-2 text-sm font-medium text-crt-text hover:bg-crt-accent-hover disabled:bg-crt-dim disabled:text-crt-disabled disabled:opacity-60"
         >
           {running ? 'Running…' : 'Run tests ▶'}
         </button>
