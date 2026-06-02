@@ -1,0 +1,7 @@
+/* @import must precede @tailwind per CSS spec. Theme styles fenced code blocks
+   that rehype-highlight wraps in <code class="hljs language-..."> markup. */
+@import 'highlight.js/styles/github.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
