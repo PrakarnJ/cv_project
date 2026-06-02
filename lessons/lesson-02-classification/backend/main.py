@@ -20,7 +20,7 @@ from shared.model_registry import REGISTRY
 from shared.progress import read_progress, update_progress
 from shared.utils import decode_image, draw_detections, encode_image
 
-from . import models_lesson01  # noqa: F401  (import for side effect: registers models)
+from . import models_lesson_02  # noqa: F401  (import for side effect: registers models)
 from . import solutions
 
 LESSON_ROOT = Path(__file__).resolve().parent.parent
@@ -35,8 +35,8 @@ EXERCISE_TIMEOUT_S = 30
 # Maps exercise IDs to the reference function in backend/solutions.py
 # that Show Solution should reveal.
 EXERCISE_SOLUTIONS: dict[str, str] = {
-    "ex1": "gaussian_blur",
-    "ex2": "compute_iou",
+    "ex1": "preprocess_for_imagenet",
+    "ex2": "top_k_accuracy",
 }
 
 
@@ -110,7 +110,7 @@ class SolutionResponse(BaseModel):
     code: str
 
 
-app = FastAPI(title="cv-learning lesson-01")
+app = FastAPI(title="cv-learning lesson-02")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],

@@ -1,45 +1,45 @@
 {
   "id": "lesson-02",
-  "title": "TODO: lesson-02-classification title",
-  "subtitle": "Image tensors, OpenCV basics, convolutions",
+  "title": "CNNs + Image Classification",
+  "subtitle": "Pre-trained classifiers, ImageNet preprocessing, top-K predictions",
   "estimated_minutes": 180,
   "exercises": [
     {
       "id": "ex1",
       "type": "fill_blank",
-      "title": "TODO: lesson-02-classification title",
+      "title": "Implement preprocess_for_imagenet",
       "starter_file": "backend/exercises/ex1_starter.py",
-      "test_target": "test_gaussian_blur",
+      "test_target": "test_preprocess_for_imagenet",
       "hints": [
-        "cv2.getGaussianKernel(k, 0) returns a (k, 1) 1-D kernel that sums to 1. Outer-product it with its transpose to get the 2-D kernel: kernel_1d @ kernel_1d.T.",
-        "cv2.filter2D(image, -1, kernel) does the convolution. The -1 tells OpenCV to keep the input dtype (uint8 in / uint8 out)."
+        "Resize so the SHORTER side is 256 px (keep aspect ratio), then crop the center 224x224. This is what torchvision's `weights.transforms()` does — the canonical ImageNet pipeline.",
+        "Convert HWC uint8 [0,255] to CHW float32 [0,1], then subtract the ImageNet mean and divide by std. mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]. Add a batch dimension at axis 0 so the output is (1, 3, 224, 224)."
       ]
     },
     {
       "id": "ex2",
       "type": "scratch",
-      "title": "TODO: lesson-02-classification title",
+      "title": "Compute top-K accuracy",
       "starter_file": "backend/exercises/ex2_starter.py",
-      "test_target": "test_iou",
+      "test_target": "test_top_k_accuracy",
       "hints": [
-        "The intersection rectangle has top-left = (max(ax1,bx1), max(ay1,by1)) and bottom-right = (min(ax2,bx2), min(ay2,by2)). Its width/height are negative when the boxes do not overlap — clip with max(0, ...).",
-        "Union = area_a + area_b - intersection. Return 0.0 when union is 0 to avoid a division-by-zero on degenerate (zero-area) boxes."
+        "argsort the logits row-by-row in descending order (numpy sorts ascending — sort `-logits` to flip). Slice the first `k` columns to get each row's top-K predictions.",
+        "A row counts as correct if the label appears anywhere in its top-K. Use broadcasting: `(top_k_indices == labels[:, None]).any(axis=1)`. Final accuracy is the mean of that boolean array."
       ]
     },
     {
       "id": "ex3",
       "type": "tweak",
-      "title": "TODO: lesson-02-classification title",
-      "playground_model": "opencv_edge",
+      "title": "Compare ResNet-18 vs MobileNet V3",
+      "playground_model": "resnet18_imagenet",
       "self_checks": [
-        "Tried kernel sizes 3, 5, 7, 9, 15",
-        "Observed what happens with kernel_size > 15",
-        "Wrote a 1-sentence reflection below"
+        "Ran the same image through both classifiers and compared the top-5",
+        "Found at least one image where the two models disagree on top-1",
+        "Wrote a 1-sentence reflection on when (or why) they disagree"
       ]
     }
   ],
   "self_checks_global": [
-    "I understand image tensor shapes (C,H,W) vs (H,W,C)",
-    "I read the OpenCV filter2D docs"
+    "I understand the standard ImageNet preprocessing pipeline (resize-256 → center-crop-224 → mean/std normalize)",
+    "I can name the top-K predictions for a familiar image and roughly explain the model's mistakes"
   ]
 }

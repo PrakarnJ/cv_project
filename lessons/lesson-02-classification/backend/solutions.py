@@ -1,37 +1,39 @@
-"""Reference solutions for lesson-01 exercises.
+"""Reference solutions for lesson-02 exercises.
 
-Imported by `backend/tests.py` as the ground truth. Not served by any
-endpoint, so the frontend never sees this file.
+Imported by `backend/tests.py` as the ground truth (and surfaced by the
+"Show solution" endpoint). Not served by any frontend route otherwise.
 """
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-
 import cv2
 import numpy as np
+import torch
+
+IMAGENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+IMAGENET_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 
 
-def gaussian_blur(image: np.ndarray, kernel_size: int = 5) -> np.ndarray:
-    k = int(kernel_size)
-    if k % 2 == 0:
-        k += 1
-    kernel_1d = cv2.getGaussianKernel(k, 0)
-    kernel_2d = kernel_1d @ kernel_1d.T
-    return cv2.filter2D(image, -1, kernel_2d)
+def preprocess_for_imagenet(image: np.ndarray) -> torch.Tensor:
+    rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    h, w = rgb.shape[:2]
+    scale = 256 / min(h, w)
+    new_h, new_w = int(round(h * scale)), int(round(w * scale))
+    resized = cv2.resize(rgb, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
+
+    top = (new_h - 224) // 2
+    left = (new_w - 224) // 2
+    cropped = resized[top : top + 224, left : left + 224]
+
+    arr = cropped.astype(np.float32) / 255.0
+    normalized = (arr - IMAGENET_MEAN) / IMAGENET_STD
+    chw = np.transpose(normalized, (2, 0, 1))
+    return torch.from_numpy(chw).unsqueeze(0)
 
 
-def compute_iou(box_a: Sequence[float], box_b: Sequence[float]) -> float:
-    ax1, ay1, ax2, ay2 = box_a
-    bx1, by1, bx2, by2 = box_b
-
-    ix1, iy1 = max(ax1, bx1), max(ay1, by1)
-    ix2, iy2 = min(ax2, bx2), min(ay2, by2)
-    inter = max(0.0, ix2 - ix1) * max(0.0, iy2 - iy1)
-
-    area_a = max(0.0, ax2 - ax1) * max(0.0, ay2 - ay1)
-    area_b = max(0.0, bx2 - bx1) * max(0.0, by2 - by1)
-    union = area_a + area_b - inter
-    if union <= 0:
-        return 0.0
-    return inter / union
+def top_k_accuracy(logits: np.ndarray, labels: np.ndarray, k: int = 1) -> float:
+    logits = np.asarray(logits)
+    labels = np.asarray(labels)
+    top_k_idx = np.argsort(-logits, axis=1)[:, :k]
+    correct = (top_k_idx == labels[:, None]).any(axis=1)
+    return float(correct.mean())

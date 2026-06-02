@@ -1,38 +1,44 @@
-"""Exercise 1 (fill-in-the-blank): implement Gaussian blur.
+"""Exercise 1 (fill-in-the-blank): preprocess an image for ImageNet models.
 
-Build a 2-D Gaussian kernel of the requested size and convolve it with the
-input image. Fill in the two `...` placeholders below.
+Every torchvision ImageNet model expects the same input pipeline. Build it
+by hand here so you understand what `weights.transforms()` actually does
+under the hood. Fill in the two `...` placeholders below.
 """
 
 from __future__ import annotations
 
 import cv2
 import numpy as np
+import torch
+
+IMAGENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+IMAGENET_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 
 
-def gaussian_blur(image: np.ndarray, kernel_size: int = 5) -> np.ndarray:
-    """Return a Gaussian-blurred copy of `image`.
+def preprocess_for_imagenet(image: np.ndarray) -> torch.Tensor:
+    """Convert a BGR uint8 image into an ImageNet-ready batch tensor.
 
     Args:
-        image: BGR uint8 ndarray of shape (H, W, 3).
-        kernel_size: odd integer in [1, 31]. If even, it will be bumped to
-            the next odd value because cv2 requires odd kernels.
+        image: BGR uint8 ndarray of shape (H, W, 3). Any H, W >= 1 is OK.
 
     Returns:
-        Blurred image with the same shape and dtype as `image`.
+        Float32 tensor of shape (1, 3, 224, 224), with ImageNet
+        mean/std applied. RGB channel order (not BGR).
     """
-    k = int(kernel_size)
-    if k % 2 == 0:
-        k += 1
+    # OpenCV is BGR; ImageNet models expect RGB.
+    rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    h, w = rgb.shape[:2]
 
-    # TODO 1: build a 2-D Gaussian kernel of shape (k, k).
-    # Hint: `cv2.getGaussianKernel(k, 0)` returns a (k, 1) 1-D kernel that
-    # sums to 1. The outer product of that vector with its own transpose
-    # gives you a 2-D kernel that also sums to 1.
-    kernel = ...
+    # TODO 1: resize so the SHORTER side is 256 px (keep aspect ratio),
+    # then center-crop the result to exactly 224 x 224.
+    # Hint: scale = 256 / min(h, w); cv2.resize(rgb, (new_w, new_h)).
+    # Center-crop: top = (new_h - 224) // 2; left = (new_w - 224) // 2.
+    cropped = ...
 
-    # TODO 2: convolve `image` with `kernel` using `cv2.filter2D`.
-    # Pass `ddepth=-1` so the output dtype matches the input.
-    blurred = ...
+    # TODO 2: convert HWC uint8 [0, 255] to CHW float32 [0, 1], apply
+    # the ImageNet mean/std normalization, and add a batch dimension.
+    # Final shape must be (1, 3, 224, 224), dtype float32.
+    # Use IMAGENET_MEAN and IMAGENET_STD defined above.
+    tensor = ...
 
-    return blurred
+    return tensor

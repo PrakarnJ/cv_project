@@ -1,26 +1,32 @@
-"""Exercise 2 (write from scratch): compute IoU between two boxes.
+"""Exercise 2 (write from scratch): compute top-K accuracy.
 
-Implement `compute_iou` from scratch. The function body is empty; the
-docstring states the expected behaviour and a few worked test cases.
+Implement `top_k_accuracy` from scratch. The function body is empty; the
+docstring states the expected behaviour and worked test cases.
 """
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+import numpy as np
 
 
-def compute_iou(box_a: Sequence[float], box_b: Sequence[float]) -> float:
-    """Intersection over Union of two axis-aligned bounding boxes.
+def top_k_accuracy(logits: np.ndarray, labels: np.ndarray, k: int = 1) -> float:
+    """Fraction of samples whose true label is in the model's top-K.
 
-    Each box is a sequence (x1, y1, x2, y2) where (x1, y1) is the
-    top-left corner and (x2, y2) is the bottom-right corner.
+    Args:
+        logits: ndarray of shape (N, C) — raw scores (or probabilities).
+        labels: ndarray of shape (N,) — true class indices in [0, C).
+        k: number of top predictions per sample to consider correct.
+           Must satisfy 1 <= k <= C.
 
     Returns:
-        IoU as a float in [0, 1]. Return 0.0 if the boxes do not overlap.
+        Accuracy as a float in [0.0, 1.0].
 
     Examples:
-        compute_iou((0, 0, 10, 10), (0,  0, 10, 10))   ->  1.0      # identical
-        compute_iou((0, 0, 10, 10), (20, 20, 30, 30))  ->  0.0      # disjoint
-        compute_iou((0, 0, 10, 10), (5,  5, 15, 15))   ->  25/175   # partial
+        # Two samples, 3 classes, true labels = [2, 2].
+        logits = np.array([[1, 2, 3],
+                           [3, 2, 1]])
+        top_k_accuracy(logits, np.array([2, 2]), k=1)  ->  0.5   # only first
+        top_k_accuracy(logits, np.array([2, 2]), k=2)  ->  0.5   # still only first
+        top_k_accuracy(logits, np.array([2, 2]), k=3)  ->  1.0   # both correct
     """
-    raise NotImplementedError("Implement compute_iou here.")
+    raise NotImplementedError("Implement top_k_accuracy here.")

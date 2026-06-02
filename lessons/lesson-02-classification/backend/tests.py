@@ -1,4 +1,4 @@
-"""Tests for lesson-01 exercises.
+"""Tests for lesson-02 exercises.
 
 Each test loads a user submission written by the test-runner endpoint to
 `backend/.work/exercise_{slug}.py` and exercises its public API. The file
@@ -13,6 +13,7 @@ from types import ModuleType
 
 import numpy as np
 import pytest
+import torch
 
 WORK_DIR = Path(__file__).resolve().parent / ".work"
 
@@ -38,37 +39,49 @@ def ex2() -> ModuleType:
     return _load_submission("ex2")
 
 
-# -- Exercise 1: gaussian_blur --------------------------------------------
+# -- Exercise 1: preprocess_for_imagenet -----------------------------------
 
 
-def test_gaussian_blur_shape(ex1: ModuleType) -> None:
+def test_preprocess_for_imagenet_shape(ex1: ModuleType) -> None:
     rng = np.random.default_rng(0)
-    img = (rng.random((32, 32, 3)) * 255).astype(np.uint8)
-    out = ex1.gaussian_blur(img, 5)
-    assert out.shape == img.shape, f"shape changed: {out.shape} != {img.shape}"
-    assert out.dtype == np.uint8, f"dtype changed: {out.dtype} != uint8"
+    img = (rng.random((300, 500, 3)) * 255).astype(np.uint8)
+    out = ex1.preprocess_for_imagenet(img)
+    assert isinstance(out, torch.Tensor), f"expected torch.Tensor, got {type(out)}"
+    assert out.shape == (1, 3, 224, 224), f"bad shape: {tuple(out.shape)}"
+    assert out.dtype == torch.float32, f"bad dtype: {out.dtype}"
 
 
-def test_gaussian_blur_blurred(ex1: ModuleType) -> None:
-    # A small bright spot on a dark background must be smeared and dimmed
-    # by a real Gaussian blur. A no-op implementation will fail this.
-    img = np.zeros((32, 32, 3), dtype=np.uint8)
-    img[15:18, 15:18] = 255
-    out = ex1.gaussian_blur(img, 9)
-    assert not np.array_equal(out, img), "blur produced identical output"
-    assert out.max() < img.max(), f"peak brightness not reduced: max={out.max()}"
+def test_preprocess_for_imagenet_normalization(ex1: ModuleType) -> None:
+    # A flat mid-gray image should normalize to roughly the negative
+    # mean/std (with the gray value of 0.5 dominating). Importantly the
+    # output must NOT be raw uint8 — that's the trap a no-op fails.
+    img = np.full((224, 224, 3), 128, dtype=np.uint8)
+    out = ex1.preprocess_for_imagenet(img)
+    assert torch.isfinite(out).all(), "non-finite values in output"
+    # Mid-gray (0.5) minus ImageNet mean ~0.45 divided by std ~0.22 -> ~0.2.
+    # Just check we're in the standardized range, NOT uint8.
+    assert out.abs().max() < 5.0, f"values look unnormalized: max={out.abs().max()}"
+    assert out.abs().max() > 0.05, f"values look zeroed/raw: max={out.abs().max()}"
 
 
-# -- Exercise 2: compute_iou ----------------------------------------------
+# -- Exercise 2: top_k_accuracy --------------------------------------------
 
 
-def test_iou_identical(ex2: ModuleType) -> None:
-    assert ex2.compute_iou((0, 0, 10, 10), (0, 0, 10, 10)) == pytest.approx(1.0)
+def test_top_k_accuracy_k1(ex2: ModuleType) -> None:
+    logits = np.array([[1, 2, 3], [3, 2, 1]])
+    labels = np.array([2, 2])
+    assert ex2.top_k_accuracy(logits, labels, k=1) == pytest.approx(0.5)
 
 
-def test_iou_disjoint(ex2: ModuleType) -> None:
-    assert ex2.compute_iou((0, 0, 10, 10), (20, 20, 30, 30)) == pytest.approx(0.0)
+def test_top_k_accuracy_k2_unchanged(ex2: ModuleType) -> None:
+    # In the second row, true label 2 has score 1, which is 3rd of 3.
+    # Top-2 doesn't help — still only the first sample is correct.
+    logits = np.array([[1, 2, 3], [3, 2, 1]])
+    labels = np.array([2, 2])
+    assert ex2.top_k_accuracy(logits, labels, k=2) == pytest.approx(0.5)
 
 
-def test_iou_partial(ex2: ModuleType) -> None:
-    assert ex2.compute_iou((0, 0, 10, 10), (5, 5, 15, 15)) == pytest.approx(25 / 175)
+def test_top_k_accuracy_k_equals_classes(ex2: ModuleType) -> None:
+    logits = np.array([[1, 2, 3], [3, 2, 1]])
+    labels = np.array([2, 2])
+    assert ex2.top_k_accuracy(logits, labels, k=3) == pytest.approx(1.0)
