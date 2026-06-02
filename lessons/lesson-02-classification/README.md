@@ -1,171 +1,166 @@
-# Lesson 01 — CV Fundamentals
+# Lesson 02 — CNNs + Image Classification
 
-Welcome to lesson one. By the end of this lesson you'll be comfortable thinking
-about images as tensors, manipulating them with OpenCV, and reasoning about
-what a convolution actually *does* to those tensors. You'll also have built two
-small functions yourself (`gaussian_blur` and `compute_iou`) and explored Canny
-edge detection in the Playground.
+Welcome to lesson two. In lesson one you saw what an image *is* (a tensor)
+and what a convolution *does* (slide a kernel and sum). Lesson two answers
+the next question: how do we stack convolutions into something that takes
+a photo and says **"that's a golden retriever, 87% confident"**?
 
-Three things to keep in mind:
-
-- The Playground is your sandbox. Try things in there before formalising them
-  in the exercises.
-- The exercises are short. Each one is one function — don't reach for libraries
-  unless the hint suggests it.
-- Read OpenCV documentation as a habit. The OpenCV docs are dense but the
-  reference is the source of truth for every shape and dtype.
+You won't train a network from scratch — that takes a million labeled
+images and a GPU-hour or three. Instead you'll use two pre-trained ImageNet
+classifiers from `torchvision`, learn the input pipeline they expect, and
+build the metric (top-K accuracy) used to score them.
 
 ---
 
-## What is an image?
+## 1. From hand-crafted features to learned ones
 
-An image is just a 3-D array of numbers. For a colour image of height `H` and
-width `W` with three channels, the tensor has shape:
+In lesson one you wrote a Gaussian blur and a Canny edge detector. Those
+are two filters someone else figured out: their kernels are hand-derived.
+They work for "make blurry" and "find edges," but if you want a filter
+that fires on *dog ears* or *steering wheels*, you can't write that down.
 
-- **`(H, W, C)`** — the convention used by OpenCV, PIL, NumPy, and almost
-  every library that touches raw pixel data on disk.
-- **`(C, H, W)`** — the convention used by PyTorch and most deep-learning
-  frameworks. The channel axis comes first so the GPU can stride efficiently.
-
-Most of the bugs you'll write in your first month doing CV come from getting
-this wrong. When in doubt, print the shape:
-
-```python
-import cv2
-img = cv2.imread('cat.png')          # (H, W, 3)  BGR uint8
-print(img.shape, img.dtype)          # e.g. (384, 512, 3) uint8
-```
-
-OpenCV reads in **BGR** order (not RGB) for historical reasons. If you display
-an OpenCV image through matplotlib without converting, the cat will look blue.
-
-```python
-rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-```
-
-Pixel values are usually 8-bit unsigned integers in `[0, 255]`. When you feed
-images into a neural network you almost always want to normalise to `float32`
-in `[0, 1]` first:
-
-```python
-x = img.astype('float32') / 255.0    # still (H, W, 3), but floats
-```
+A **convolutional neural network** doesn't ask you to. It stacks dozens or
+hundreds of filters and learns their values from data. Early layers end
+up looking like edge detectors (we know this because we've inspected
+them); deeper layers respond to textures, parts, then whole objects.
 
 ---
 
-## OpenCV basics
+## 2. Anatomy of a CNN classifier
 
-The four operations you'll use most:
+A typical ImageNet classifier looks like:
 
-```python
-img = cv2.imread('image.png')                 # load (BGR)
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # 3 -> 1 channel
-small = cv2.resize(img, (256, 256))           # note: (width, height) order
-cv2.imwrite('out.png', small)                 # save
+```
+input (3, 224, 224)
+  └─ conv + ReLU + (optional) batchnorm    ─┐
+  └─ conv + ReLU + ...                       │  feature extractor
+  └─ pool (downsample by 2)                  │  (stacked many times)
+  └─ ... more conv/pool ...                 ─┘
+  └─ global average pool        (final feature vector, ~512 or 1280 dims)
+  └─ fully-connected layer      (1000 outputs — one per ImageNet class)
+  └─ softmax                    (turns logits into probabilities)
 ```
 
-A few sharp edges that will bite you exactly once:
+Each conv layer is doing the same operation as lesson-01's `filter2D`,
+just with thousands of kernels and learned weights. Pooling halves the
+spatial resolution so deeper layers can see larger patterns.
 
-- `cv2.resize(img, (W, H))` takes width first, but `img.shape` returns
-  `(H, W, …)`. They're inconsistent on purpose; just memorise it.
-- `cv2.imread` returns `None` on missing files instead of raising. Always check
-  `if img is None: raise FileNotFoundError(path)`.
-- Grayscale conversion drops the channel axis: shape goes from `(H, W, 3)` to
-  `(H, W)`. Many subsequent operations care.
+`ResNet-18` and `MobileNet V3 Small` (the two models registered in this
+lesson's playground) follow this shape. ResNet-18 has ~11M parameters;
+MobileNet V3 Small has ~2.5M — about 4x smaller, designed for phones.
 
 ---
 
-## Convolutions
+## 3. ImageNet and pre-trained models
 
-A convolution slides a small grid of numbers — the **kernel** — over the image.
-At every position, it multiplies the kernel against the local pixel
-neighbourhood and sums the result. That sum becomes the new pixel value.
+"ImageNet" usually means the **ImageNet-1K** dataset: 1.28 million training
+images across 1000 classes. The classes are oddly specific (`golden
+retriever`, `Shih-Tzu`, `tench`, `chain-link fence`) and famously
+quirky — there is no `human` class, but there are 120 dog breeds.
 
-The kernel shape decides what feature gets emphasised. A kernel that's
-positive everywhere produces a **blur** (each output pixel is a weighted
-average of its neighbours). A kernel with positive and negative regions can
-emphasise edges, corners, or specific orientations.
-
-Slide the slider below to see how kernel size changes the blur. With kernel 1
-the image is unchanged; with kernel 11 it's smeared significantly.
-
-<ConvolutionDemo />
-
-For a Gaussian blur specifically, the kernel weights follow a 2-D Gaussian
-distribution — centre pixels weigh more than corner pixels. Here's a 1-D
-slice of that weighting at various sigmas:
-
-<KernelVisualizer />
-
-In code, you can build a Gaussian kernel and convolve manually:
+`torchvision.models` ships with weights pre-trained on ImageNet-1K. You
+get a working classifier with three lines:
 
 ```python
-import cv2
-
-k = 5  # must be odd
-kernel_1d = cv2.getGaussianKernel(k, 0)       # shape (5, 1), sums to 1
-kernel_2d = kernel_1d @ kernel_1d.T           # shape (5, 5), sums to 1
-blurred = cv2.filter2D(img, -1, kernel_2d)
+from torchvision.models import resnet18, ResNet18_Weights
+weights = ResNet18_Weights.IMAGENET1K_V1
+model = resnet18(weights=weights).eval()
 ```
 
-…or just let OpenCV do both steps in one call:
-
-```python
-blurred = cv2.GaussianBlur(img, (5, 5), 0)    # equivalent result
-```
-
-**Exercise 1** asks you to build the kernel and convolve yourself — the
-first version above. Doing it once by hand makes everything that follows
-(edge detectors, feature maps, ConvNets) less mysterious.
+That's the model. Now the input — which is where most beginner code breaks.
 
 ---
 
-## Edge detection
+## 4. The ImageNet preprocessing recipe
 
-An *edge* in an image is a place where pixel intensity changes sharply. The
-Canny edge detector — the standard "give me the edges" tool — works in four
-stages:
+Every torchvision ImageNet model expects the **same four-step input
+pipeline**. Skip a step and the model returns garbage predictions — not
+an error, just nonsense.
 
-1. **Blur** the image slightly to suppress noise (otherwise every speckle
-   becomes an edge).
-2. **Compute the gradient** at every pixel: how much does intensity change
-   moving left-right, and how much moving up-down? This gives a gradient
-   magnitude and direction per pixel.
-3. **Non-max suppression**: only keep the gradient peaks. A thick blurry edge
-   gets thinned down to a 1-pixel ridge.
-4. **Hysteresis thresholding**: pixels above a `high_threshold` are
-   definitely edges. Pixels below a `low_threshold` definitely aren't.
-   Pixels in between are edges only if they connect to a high-threshold pixel.
+1. **Convert color order**: OpenCV reads images as BGR; torchvision
+   expects RGB. `cv2.cvtColor(image, cv2.COLOR_BGR2RGB)`.
 
-The two thresholds are the only knobs you get, and they're the source of
-every "why is Canny missing this edge" problem. Tuning them is exercise 3.
+2. **Resize so the SHORTER side is 256**, keeping aspect ratio. A
+   1920×1080 image becomes ~455×256. A 100×200 image becomes 256×512.
+   The longer side is whatever it ends up being.
 
-```python
-import cv2
+3. **Center-crop to 224×224**. This is the actual input size. The
+   resize-then-crop two-step is what gives you a square input without
+   distorting the aspect ratio.
 
-img = cv2.imread('street.png')
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-edges = cv2.Canny(gray, threshold1=50, threshold2=150)
-```
+4. **Normalize**: convert uint8 [0, 255] to float32 [0, 1], then
+   `(x - mean) / std` per channel, with
+   `mean = [0.485, 0.456, 0.406]`, `std = [0.229, 0.224, 0.225]`. These
+   are the per-channel mean and std of the ImageNet training set; using
+   them puts new images on the same scale the model trained on.
 
-A useful rule of thumb: keep `threshold2` roughly 2–3× `threshold1`. Setting
-both too low produces a "snowstorm" of false edges; both too high and you
-lose real edges.
+Finally, shape the tensor as `(batch, channels, height, width) =
+(1, 3, 224, 224)` because PyTorch models process batches, even a batch
+of one.
+
+torchvision's `weights.transforms()` does all of this in one line.
+**Exercise 1** asks you to build it from scratch so you understand each
+step.
 
 ---
 
-## What's next
+## 5. Reading top-K predictions
 
-You've now seen enough to start the exercises. Head to:
+The classifier's output is 1000 numbers — one **logit** per ImageNet class.
+Run `softmax` over them to get probabilities that sum to 1:
 
-- **Playground** to try `opencv_blur` and `opencv_edge` on the bundled cat
-  and street images, or upload your own.
-- **Exercises** to:
-  1. Implement `gaussian_blur` (fill in the two blanks).
-  2. Implement `compute_iou` from scratch.
-  3. Tune Canny thresholds in the Playground and reflect on what changes.
-- **Progress** to track your auto-tests and tick off the self-check list.
+```python
+probs = torch.nn.functional.softmax(logits, dim=-1)
+scores, indices = torch.topk(probs, k=5)
+```
 
-Good luck. Don't peek at solutions before trying yourself for at least ten
-minutes — the muscle you're building is "I can fail at this and recover," and
-that only happens if you actually fail first.
+The result is the top-5 most likely classes, plus their probabilities.
+For a clear shot of a cat, you might see:
+
+```
+1. Egyptian cat            0.42
+2. tabby                   0.31
+3. tiger cat               0.18
+4. lynx                    0.06
+5. cougar                  0.01
+```
+
+The top-1 may be wrong (it's a tabby), but the answer is in the top-3.
+That's why **top-K accuracy** is the standard ImageNet metric — it gives
+partial credit for "close enough."
+
+**Exercise 2** asks you to implement top-K accuracy from scratch. It's a
+one-liner with NumPy broadcasting, but the broadcasting trick is worth
+internalizing — you'll see it again.
+
+---
+
+## A note on the bundled sample images
+
+The `cat.png` and `street.png` in this lesson's `assets/` folder are
+*illustrations*, not photographs. Try running ResNet-18 on `cat.png` — the
+top-5 will look bizarre (you'll get things like "pinwheel" and "traffic
+light"). That isn't a bug. ImageNet was trained on real photographs, so
+the model has effectively never seen a flat-shaded cartoon during
+training. The phenomenon has a name: **distribution shift** (sometimes
+called domain shift). It's one of the most common reasons real-world
+classifiers fail in production.
+
+For meaningful predictions, **upload your own photos** via the file picker
+in the Playground — a real photo of an animal, a vehicle, a household
+object. The classes are listed in
+[the ImageNet-1K class list](https://github.com/pytorch/hub/blob/master/imagenet_classes.txt)
+if you want to aim for known-good labels.
+
+---
+
+## Next steps
+
+Switch to the **Playground** tab — start with the bundled illustration
+(see the note above), then upload a real photo and watch the predictions
+shift. Work through the three exercises:
+
+- **Exercise 1** — implement `preprocess_for_imagenet` (fill in two blanks).
+- **Exercise 2** — implement `top_k_accuracy` from scratch.
+- **Exercise 3** — compare ResNet-18 vs MobileNet V3 in the playground,
+  find a disagreement, and reflect on it.

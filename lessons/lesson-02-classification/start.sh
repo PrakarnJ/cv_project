@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# One-command launcher for lesson-01-cv-fundamentals.
+# One-command launcher for lesson-02-classification.
 # Starts the FastAPI backend on :8000 and the Vite dev server on :5173.
 # Stops both when the foreground shell exits (SIGINT / Ctrl-C).
 
