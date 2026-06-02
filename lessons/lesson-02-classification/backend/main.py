@@ -113,7 +113,7 @@ class SolutionResponse(BaseModel):
 app = FastAPI(title="cv-learning lesson-02")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5175"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

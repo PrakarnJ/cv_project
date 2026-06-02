@@ -27,12 +27,12 @@ trap 'kill 0' EXIT
   cd "$REPO_ROOT"
   uv run uvicorn \
     lessons.lesson-02-classification.backend.main:app \
-    --reload --port 8000
+    --reload --port 8003
 ) &
 
 (
   cd "$LESSON_ROOT/frontend"
-  npm run dev -- --port 5173
+  npm run dev -- --port 5175
 ) &
 
 wait
