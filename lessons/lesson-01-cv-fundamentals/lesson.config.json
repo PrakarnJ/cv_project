@@ -1,0 +1,45 @@
+{
+  "id": "lesson-01",
+  "title": "CV Fundamentals",
+  "subtitle": "Image tensors, OpenCV basics, convolutions",
+  "estimated_minutes": 180,
+  "exercises": [
+    {
+      "id": "ex1",
+      "type": "fill_blank",
+      "title": "Implement gaussian_blur",
+      "starter_file": "backend/exercises/ex1_starter.py",
+      "test_target": "test_gaussian_blur",
+      "hints": [
+        "cv2.getGaussianKernel(k, 0) returns a (k, 1) 1-D kernel that sums to 1. Outer-product it with its transpose to get the 2-D kernel: kernel_1d @ kernel_1d.T.",
+        "cv2.filter2D(image, -1, kernel) does the convolution. The -1 tells OpenCV to keep the input dtype (uint8 in / uint8 out)."
+      ]
+    },
+    {
+      "id": "ex2",
+      "type": "scratch",
+      "title": "Compute IoU between two boxes",
+      "starter_file": "backend/exercises/ex2_starter.py",
+      "test_target": "test_iou",
+      "hints": [
+        "The intersection rectangle has top-left = (max(ax1,bx1), max(ay1,by1)) and bottom-right = (min(ax2,bx2), min(ay2,by2)). Its width/height are negative when the boxes do not overlap — clip with max(0, ...).",
+        "Union = area_a + area_b - intersection. Return 0.0 when union is 0 to avoid a division-by-zero on degenerate (zero-area) boxes."
+      ]
+    },
+    {
+      "id": "ex3",
+      "type": "tweak",
+      "title": "Tune kernel size on edge detection",
+      "playground_model": "opencv_edge",
+      "self_checks": [
+        "Tried kernel sizes 3, 5, 7, 9, 15",
+        "Observed what happens with kernel_size > 15",
+        "Wrote a 1-sentence reflection below"
+      ]
+    }
+  ],
+  "self_checks_global": [
+    "I understand image tensor shapes (C,H,W) vs (H,W,C)",
+    "I read the OpenCV filter2D docs"
+  ]
+}

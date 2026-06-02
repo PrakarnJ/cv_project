@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Lesson working dirs (generated code, temp files)
+.work/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Local progress / cache (regenerated)
+shared/progress.json
