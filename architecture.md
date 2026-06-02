@@ -358,12 +358,19 @@ wait
 
 | Concern | Mac (Apple Silicon) | Ubuntu 24.04 |
 |---------|---------------------|--------------|
-| Python install | `brew install uv` | `curl -LsSf <https://astral.sh/uv/install.sh> | sh` |
-| Node install | `brew install node` | `apt install nodejs npm` (or nvm) |
+| Python install | `brew install uv` | `curl -LsSf https://astral.sh/uv/install.sh \| sh` (uv auto-downloads Python 3.11 per `.python-version`) |
+| Node install | `brew install node` | nvm or NodeSource — apt's `nodejs` is 18.x and too old for Vite 8 (requires `^20.19.0 \|\| >=22.12.0`) |
+| PyTorch wheel | PyPI default (MPS-enabled) | Pinned to `https://download.pytorch.org/whl/cu129` via `[tool.uv.sources]` in `pyproject.toml` |
 | PyTorch device | `mps` | `cuda` if GPU else `cpu` |
+| NVIDIA driver | n/a | RTX 50-series (Blackwell, sm_120) needs driver **570+**: `sudo ubuntu-drivers install nvidia:570`. CUDA toolkit is **not** required — the runtime ships in the wheel. |
 | OpenCV install | `opencv-python-headless` via uv | same |
 | Webcam | Browser handles natively | Browser handles natively |
 | Webcam permission | macOS Camera permission | Linux /dev/video0 (browser asks) |
+| rsync (for `scripts/new_lesson.sh`) | bundled with macOS | `sudo apt install rsync` (not in Server minimal) |
+
+Per-platform torch resolution is wired through uv's universal lockfile
+(`[tool.uv.sources]` with a `sys_platform == 'linux'` marker). Mac falls
+through to the PyPI wheel; Linux pulls from the CUDA 12.9 index.
 
 No OS-specific code branches except `shared/device.py`.
 

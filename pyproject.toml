@@ -10,8 +10,11 @@ dependencies = [
     "pillow>=12.2.0",
     "pydantic>=2.13.4",
     "sse-starlette>=3.4.4",
-    "torch>=2.12.0",
-    "torchvision>=0.27.0",
+    # Lower bound is 2.11.0 because that's the highest currently mirrored to
+    # PyTorch's CUDA 12.9 index; PyPI's MPS-enabled wheel for Mac is 2.12.0,
+    # which uv picks via the Mac-side resolution split.
+    "torch>=2.11.0",
+    "torchvision>=0.26.0",
     "uvicorn[standard]>=0.47.0",
 ]
 
@@ -25,3 +28,14 @@ dev = [
 # Starter files intentionally contain `...` placeholders and pre-staged imports
 # for the student to complete; suppress unused-import and unused-variable rules.
 "**/exercises/*_starter.py" = ["F401", "F841"]
+
+# Linux gets PyTorch's CUDA 12.9 wheel (Blackwell / RTX 50-series support).
+# Mac falls through to the PyPI default, which is the MPS-enabled wheel.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu129", marker = "sys_platform == 'linux'" }]
+torchvision = [{ index = "pytorch-cu129", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu129"
+url = "https://download.pytorch.org/whl/cu129"
+explicit = true

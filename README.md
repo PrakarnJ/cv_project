@@ -8,11 +8,46 @@ one command.
 
 ## Prerequisites
 
-- **`uv`** (Python 3.11 toolchain) — see <https://docs.astral.sh/uv/>
-- **Node 20** — pinned via `lessons/<lesson>/frontend/.nvmrc`
+- **`uv`** (auto-installs Python 3.11 per `.python-version`) — <https://docs.astral.sh/uv/>
+- **Node 20.19+** (pinned via `lessons/<lesson>/frontend/.nvmrc`; Vite 8 requires
+  `^20.19.0 || >=22.12.0`)
+- **`rsync`** — used by `scripts/new_lesson.sh`
 
-Supported on Mac (Apple Silicon, MPS) and Ubuntu 24.04 (CUDA or CPU). PyTorch
-device selection is automatic via `shared/device.py`.
+PyTorch device is selected automatically by `shared/device.py`: `mps` on Mac
+Apple Silicon, `cuda` on Linux with NVIDIA GPU, `cpu` otherwise.
+
+### Mac (Apple Silicon)
+
+```bash
+brew install uv node rsync
+```
+
+### Ubuntu 24.04
+
+Ubuntu's apt nodejs is 18.x, which is too old for Vite 8. Use nvm or NodeSource:
+
+```bash
+sudo apt update && sudo apt install -y curl git rsync ca-certificates
+
+# uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Node 20 via nvm (matches frontend/.nvmrc)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+. ~/.nvm/nvm.sh && nvm install 20
+```
+
+If the box has an NVIDIA GPU (e.g. RTX 50-series Blackwell), install the
+**570-series driver** before running anything:
+
+```bash
+sudo ubuntu-drivers install nvidia:570
+sudo reboot
+nvidia-smi   # confirm the GPU is visible
+```
+
+PyTorch's CUDA runtime libraries ship inside the wheel, so the standalone
+CUDA toolkit is not required.
 
 ## Start lesson-01
 
