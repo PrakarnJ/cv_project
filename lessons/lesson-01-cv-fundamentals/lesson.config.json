@@ -18,22 +18,23 @@
     {
       "id": "ex2",
       "type": "scratch",
-      "title": "Compute IoU between two boxes",
+      "title": "Sharpen with a custom convolution kernel",
       "starter_file": "backend/exercises/ex2_starter.py",
-      "test_target": "test_iou",
+      "test_target": "test_sharpen",
       "hints": [
-        "The intersection rectangle has top-left = (max(ax1,bx1), max(ay1,by1)) and bottom-right = (min(ax2,bx2), min(ay2,by2)). Its width/height are negative when the boxes do not overlap — clip with max(0, ...).",
-        "Union = area_a + area_b - intersection. Return 0.0 when union is 0 to avoid a division-by-zero on degenerate (zero-area) boxes."
+        "A sharpen kernel emphasises the centre pixel and subtracts its neighbours. The classic 3x3 is [[0,-1,0],[-1,5,-1],[0,-1,0]] — note it sums to 1, so flat regions keep their brightness while edges get boosted.",
+        "Build the kernel with np.array(..., dtype=np.float32) and convolve in one call: cv2.filter2D(image, -1, kernel). The -1 keeps the input dtype (uint8 in / uint8 out)."
       ]
     },
     {
       "id": "ex3",
       "type": "tweak",
-      "title": "Tune kernel size on edge detection",
+      "title": "Tune Canny thresholds on edge detection",
       "playground_model": "opencv_edge",
       "self_checks": [
-        "Tried kernel sizes 3, 5, 7, 9, 15",
-        "Observed what happens with kernel_size > 15",
+        "Tried several low/high threshold pairs (e.g. 50/150, 100/200, 10/40)",
+        "Saw the 'snowstorm' of false edges when both thresholds are too low",
+        "Kept high_threshold ≈ 2–3× low_threshold and noted the effect",
         "Wrote a 1-sentence reflection below"
       ]
     }

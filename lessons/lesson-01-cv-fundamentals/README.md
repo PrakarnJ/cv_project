@@ -3,8 +3,8 @@
 Welcome to lesson one. By the end of this lesson you'll be comfortable thinking
 about images as tensors, manipulating them with OpenCV, and reasoning about
 what a convolution actually *does* to those tensors. You'll also have built two
-small functions yourself (`gaussian_blur` and `compute_iou`) and explored Canny
-edge detection in the Playground.
+small functions yourself (`gaussian_blur` and `sharpen`, two sides of the same
+convolution coin) and explored Canny edge detection in the Playground.
 
 Three things to keep in mind:
 
@@ -118,6 +118,23 @@ blurred = cv2.GaussianBlur(img, (5, 5), 0)    # equivalent result
 first version above. Doing it once by hand makes everything that follows
 (edge detectors, feature maps, ConvNets) less mysterious.
 
+The blur kernel was positive everywhere. Flip some weights negative and the
+same `filter2D` machinery does the opposite job — it *sharpens*. The classic
+3×3 sharpen kernel keeps a strong positive centre and subtracts its neighbours:
+
+```python
+import numpy as np
+
+kernel = np.array([[ 0, -1,  0],
+                   [-1,  5, -1],
+                   [ 0, -1,  0]], dtype=np.float32)
+sharpened = cv2.filter2D(img, -1, kernel)     # weights sum to 1
+```
+
+Because the weights sum to 1, flat regions keep their brightness while pixels
+straddling an edge get pushed apart, making the edge pop. **Exercise 2** asks
+you to write this `sharpen` function from scratch.
+
 ---
 
 ## Edge detection
@@ -162,7 +179,7 @@ You've now seen enough to start the exercises. Head to:
   and street images, or upload your own.
 - **Exercises** to:
   1. Implement `gaussian_blur` (fill in the two blanks).
-  2. Implement `compute_iou` from scratch.
+  2. Build a `sharpen` kernel and convolve it from scratch.
   3. Tune Canny thresholds in the Playground and reflect on what changes.
 - **Progress** to track your auto-tests and tick off the self-check list.
 

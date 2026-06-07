@@ -59,16 +59,29 @@ def test_gaussian_blur_blurred(ex1: ModuleType) -> None:
     assert out.max() < img.max(), f"peak brightness not reduced: max={out.max()}"
 
 
-# -- Exercise 2: compute_iou ----------------------------------------------
+# -- Exercise 2: sharpen --------------------------------------------------
 
 
-def test_iou_identical(ex2: ModuleType) -> None:
-    assert ex2.compute_iou((0, 0, 10, 10), (0, 0, 10, 10)) == pytest.approx(1.0)
+def test_sharpen_shape(ex2: ModuleType) -> None:
+    rng = np.random.default_rng(0)
+    img = (rng.random((32, 32, 3)) * 255).astype(np.uint8)
+    out = ex2.sharpen(img)
+    assert out.shape == img.shape, f"shape changed: {out.shape} != {img.shape}"
+    assert out.dtype == np.uint8, f"dtype changed: {out.dtype} != uint8"
 
 
-def test_iou_disjoint(ex2: ModuleType) -> None:
-    assert ex2.compute_iou((0, 0, 10, 10), (20, 20, 30, 30)) == pytest.approx(0.0)
+def test_sharpen_uniform_preserved(ex2: ModuleType) -> None:
+    # A sharpen kernel sums to 1, so a flat region must keep its brightness.
+    img = np.full((16, 16, 3), 100, dtype=np.uint8)
+    out = ex2.sharpen(img)
+    assert np.array_equal(out, img), "uniform image changed under sharpen"
 
 
-def test_iou_partial(ex2: ModuleType) -> None:
-    assert ex2.compute_iou((0, 0, 10, 10), (5, 5, 15, 15)) == pytest.approx(25 / 175)
+def test_sharpen_enhances_peak(ex2: ModuleType) -> None:
+    # A small bright spot on a mid-grey background must be pushed brighter by a
+    # real sharpen. Modest values keep the result inside uint8 (no clipping).
+    # A no-op implementation will fail this.
+    img = np.full((32, 32, 3), 100, dtype=np.uint8)
+    img[15:17, 15:17] = 120
+    out = ex2.sharpen(img)
+    assert out.max() > img.max(), f"peak not enhanced: max={out.max()} <= {img.max()}"
