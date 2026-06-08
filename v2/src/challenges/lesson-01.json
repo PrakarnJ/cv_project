@@ -1,0 +1,60 @@
+{
+  "lesson": "Lesson 1 — CV Fundamentals",
+  "intro": "Build small image pipelines by dragging nodes and wiring them Source → … → Output. Each challenge checks your Output against the goal.",
+  "challenges": [
+    {
+      "id": "c1",
+      "title": "See in grayscale",
+      "goal": "Color images are 3 channels (R,G,B). Many CV steps work on a single brightness channel. Add a Grayscale node between the Image and the Output.",
+      "sample": "/samples/cat.png",
+      "solution": [{ "type": "grayscale" }],
+      "tolerance": 8,
+      "hints": [
+        "Drag a 'Grayscale' node onto the canvas (Color group in the palette).",
+        "Wire it up: Image Source → Grayscale → Output (drag from the green dots)."
+      ]
+    },
+    {
+      "id": "c2",
+      "title": "Black & white mask",
+      "goal": "Turn the photo into a clean black-and-white mask using Otsu thresholding (it picks the cutoff for you). Pipeline: Image → Threshold (Otsu) → Output.",
+      "sample": "/samples/cat.png",
+      "solution": [{ "type": "threshold", "params": { "mode": "otsu" } }],
+      "tolerance": 8,
+      "hints": [
+        "Drag a 'Threshold' node (Filter group).",
+        "Set its Mode to 'Otsu (auto)'.",
+        "Wire: Image Source → Threshold → Output."
+      ]
+    },
+    {
+      "id": "c3",
+      "title": "Find the edges",
+      "goal": "Detect edges with Canny using the default thresholds (50 / 150). Pipeline: Image → Canny Edges → Output.",
+      "sample": "/samples/street.png",
+      "solution": [{ "type": "canny", "params": { "low": 50, "high": 150 } }],
+      "tolerance": 6,
+      "hints": [
+        "Drag a 'Canny Edges' node (Edges group).",
+        "Keep Low = 50 and High = 150.",
+        "Wire: Image Source → Canny Edges → Output."
+      ]
+    },
+    {
+      "id": "c4",
+      "title": "Clean edges (blur first)",
+      "goal": "Raw edge detection is noisy. Blur first to calm it down, THEN detect edges. Pipeline: Image → Gaussian Blur (k=5) → Canny Edges (50/150) → Output.",
+      "sample": "/samples/street.png",
+      "solution": [
+        { "type": "gaussian_blur", "params": { "ksize": 5 } },
+        { "type": "canny", "params": { "low": 50, "high": 150 } }
+      ],
+      "tolerance": 6,
+      "hints": [
+        "Drag a 'Gaussian Blur' node and a 'Canny Edges' node.",
+        "Keep blur kernel = 5, Canny = 50 / 150.",
+        "Wire them in order: Image Source → Gaussian Blur → Canny Edges → Output."
+      ]
+    }
+  ]
+}

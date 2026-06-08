@@ -1,0 +1,41 @@
+@import '@xyflow/react/dist/style.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #0a0e0a;
+  color: #c8f7c8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Make React Flow blend into the CRT theme. */
+.react-flow {
+  background: #0a0e0a;
+}
+.react-flow__node {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.react-flow__handle {
+  width: 10px;
+  height: 10px;
+  background: #39ff14;
+  border: 1px solid #0a0e0a;
+}
+.react-flow__edge-path {
+  stroke: #5f8f5f;
+  stroke-width: 2;
+}
+.react-flow__controls button {
+  background: #111811;
+  border-bottom: 1px solid #1f2a1f;
+  fill: #c8f7c8;
+}

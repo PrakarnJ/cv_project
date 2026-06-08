@@ -20,4 +20,8 @@ dist/
 .vscode/
 
 # Local progress / cache (regenerated)
-shared/progress.json
+v1/shared/progress.json
+
+# Vendored OpenCV.js WASM bundle (~11MB) — fetched from the
+# @techstark/opencv-js devDependency by v2/scripts/copy-opencv.mjs
+v2/public/opencv/opencv.js
